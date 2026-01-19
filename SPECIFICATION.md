@@ -43,7 +43,7 @@ The root object has the name "root" and OID of 0 (decimal) and a type of 0 (deci
 Root object implements these RPCs:
 
 
-# Base headers
+# Request Base headers
 (All integers in base headers are little endian.)  
 Base headers are a special type of headers that do not change accross OORRP versions. (Left side comes first.)  
 Base header definition:  
