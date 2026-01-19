@@ -47,7 +47,7 @@ Root object implements these RPCs:
 (All integers in base headers are little endian.)  
 Base headers are a special type of headers that do not change accross OORRP versions. (Left side comes first.)  
 Base header definition:  
-    rsiz[uint32], rid[uint8], ot[uint16], oid[uint64], rpcid[uint16]
+    rsiz[uint32], rid[uint8], ot[uint16], oid[uint64], rpcid[uint16], maver[uint8], miver[uint8]
 
 
 # After this point is V1 specific.
