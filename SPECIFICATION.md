@@ -23,7 +23,7 @@ Both name and OID is unique to their respective objects.
   
 ## Object ID  
 Object IDs are permanent addresses of objects. OIDs persist for the lifetime of the server and after server reboots, resets etc.  
-OIDs by their nature are unique to their object. and is not hiererical.  
+OIDs by their nature are unique to their object.  
 OIDs are a uint64.
 OID 0 (decimal) is reserved for root object.  
 
@@ -31,36 +31,31 @@ OID 0 (decimal) is reserved for root object.
 Object types define what RPCs an object must implement.  
 Object types are a uint16.
 
-All object types have their own RPCs addresses by rpcids. rpcids are an uint16. rpcid 0 (decimal) is reserved for no-op.
+All object types have their own RPC addresses by rpcids. rpcids are an uint16. rpcid 0 (decimal) is reserved for no-op.
 The highest bit of the rpcid is the response bit. If it is set, then the message is a response.  
 The second highest bit of the rpcid is the error bit. If it is set, then the message is an error.
 all RPCs other than special discovery RPCs (implemented by the root object) are not allowed to have variable lenght fields.
 
-Object types are to be defined by OORRP versions. Type 0 (decimal) is reserved for typeless objects.
-Typeless object should not implement any RPCs except the root object.
+Object types are to be defined by OORRP versions. Type 0 (decimal) is reserved for root object.
 
 ## Object Hierarchy  
-Objects follow a tree hierarchy. The root object is a special object that has itself as its parent.
-All objects must have a parent object.
+OORRP has a flat object hierachy. This is a design decision to prevent variable-lenght RPC arguements and responses. 
 ### Root object
-The root object is a special object that implements protocol RPCs, is typeless and has itself as its parent.  
+The root object is a special object that implements protocol RPCs, and is typeless.
 The root object has the name "root" and OID of 0 (decimal) and a type of 0 (decimal).
 Root object implements these RPCs (Tailing r means it is the response definition, the heading numbers are their RPCIDs in decimal.):  
 TODO: Errors for each RPC
 1: typeof. `oid[uint64]`. The typeof RPC is used to get the object type of the object at oid.
 1r: typeof. `otype[uint16]`. otype represents the object's type. Little endian.  
 
-2: oidof. `name_len[uint32], name[name_len]` name_len represents the lenght of the name. name represents the lenght of the name. returns the OID of the queried object. name_len is little endian.
+2: oidof. `name_len[uint32], name[name_len]` name_len represents the lenght of the name in bytes.. name represents the lenght of the name. returns the OID of the queried object. name_len is little endian.
 2r: oidof `oid[uint64]` oid represents the object ID of the queried object. oid is little endian.  
 
-3: parentof. `oid[uint64]`, Returns the parent OID of the object at oid. oid is little endian.  
-3r: parentof. `oid[uint64]` oid represents the object ID of the parent object. oid is little endian.  
+3: nameof `oid[uint64]`. Returns the name of the object at oid. oid is little endian.  
+3r: nameof. `name_len[uint32], name[name_len]`. name_len represent the lenght of the name in bytes. name is the name of the queried object. name_len is little endian.  
 
-4: child_amountof. `oid[uint64]` Returns the amount of children the object at oid has. oid is little endian.  
-4r: child_amountof. `children_amount[uint64]` children_amount represents the amount of children the queried object has. children_amount is little endian.  
-
-5: get_children. `oid[uint64], 
-
+4: sizeof. `Adds no additional headers.` Returns the maximum message size the OORRP server can handle.  
+4r: sizeof. `size[uint64]`. size represents the maximum message size the server can handle. size is little endian.  
 
 
 
