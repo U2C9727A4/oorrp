@@ -57,6 +57,12 @@ TODO: Errors for each RPC
 4: sizeof. `Adds no additional headers.` Returns the maximum message size the OORRP server can handle.  
 4r: sizeof. `size[uint64]`. size represents the maximum message size the server can handle. size is little endian.  
 
+5: get_object_amount. `Adds no additional headers.`. returns the amount of objects the server has.
+5r: get_object_amount. `obj_amount[uint64]`. obj_amount represents the amount of objects the server has. obj_amount is little endian.
+
+6: get_oid `i[uint64]`. Gets the OID of the i'th object. (Objects are sorted by their OIDs. When i = 0, the object at that position is the object with the highest numerical OID.) i is little endian.  
+6r: get_oid. `oid[uint64]` oid represents the object id of the object. oid is little endian.
+
 
 
 # Base headers
@@ -68,6 +74,23 @@ Base header definition:
 rsiz represents the full message size. This size includes rsiz's space aswell.
 rid is the message ID of the message. It is only used to corrolate request-reponse pairs. Due to this, it only applies to messages that are in-flight. message ID collisions are allowed as long as the colliding messages are not in-flight at the same time.
 
+# Errors
+Errors in OORRP are an uint32. with this layout:
+(numbers are decimal)
+Error codes ranging from 0 to 1000 are transport errors
+0: Invalid CRC.
+1: Malformed Message
+2: Desync recovery failed.
+
+Error codes ranging from 1000 to 2000 are message errors.
+1000: Invalid RID
+1001: Invalid OID
+1002: Invalid RPCID
+1003 Invalid Object Type.
+1004: Object does not exist.
+1005: Request size exceeds buffer limits.
+
+Error codes after 0x0000FFFF (hexidecimal) are open for use by RPCs defined by current and later versions of OORRP. But before that point it is reserved for OORRP.
 
 # After this point is V1 specific.
 
