@@ -63,6 +63,12 @@ TODO: Errors for each RPC
 6: get_oid `i[uint64]`. Gets the OID of the i'th object. (Objects are sorted by their OIDs. When i = 0, the object at that position is the object with the highest numerical OID.) i is little endian.  
 6r: get_oid. `oid[uint64]` oid represents the object id of the object. oid is little endian.
 
+TODO: get_inflight_size
+
+## Object lifetimes
+An object at an OID may not dynamically change its type. The only change that can happen is for the object to be deleted. Any other change during its life is not allowed.
+Objects may dynamically appear and disappear, but must obey the OID rule of having a set one accross its lifetimes.
+
 
 
 # Base headers
@@ -73,6 +79,10 @@ Base header definition:
 
 rsiz represents the full message size. This size includes rsiz's space aswell.
 rid is the message ID of the message. It is only used to corrolate request-reponse pairs. Due to this, it only applies to messages that are in-flight. message ID collisions are allowed as long as the colliding messages are not in-flight at the same time.
+
+## rid and async
+RID applies *per client*. If a server is handling multiple clients, RID collisions among clients are allowed.  
+Messages follow a FCFS queue, but it is not enforced. Implementations are free to prioritize operations on some objects over others. Due to this, clients cannot expect responses to come in order.
 
 # Errors
 Errors in OORRP are an uint32. with this layout:
@@ -90,7 +100,7 @@ Error codes ranging from 1000 to 2000 are message errors.
 1004: Object does not exist.
 1005: Request size exceeds buffer limits.
 
-Error codes after 0x0000FFFF (hexidecimal) are open for use by RPCs defined by current and later versions of OORRP. But before that point it is reserved for OORRP.
+Error codes after `2^32 - 1 / 2` (2_147_483_647 decimal) are open for use by RPCs defined by current and later versions of OORRP. But before that point it is reserved for OORRP.
 
 # After this point is V1 specific.
 
