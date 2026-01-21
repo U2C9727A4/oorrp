@@ -137,3 +137,11 @@ After the RPC error point, error codes are tied to their RPCs. Due to this diffi
 
 TODO:
 Topology types
+
+TODOV1:
+Digital pin object
+PWM pin object
+ADC object
+DAC object
+AxisLinearActuator object
+RotatingActuator object
