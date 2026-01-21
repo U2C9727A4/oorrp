@@ -20,6 +20,9 @@ oid (Object ID).
 Name is a human-readable name of the object, in ASCII. It cannot be used for object RPCs.  
 oid is defined below.  
 Both name and OID is unique to their respective objects.
+
+## Object versioning
+OORRP is defined atomically. Objects, RPCs and error values may not be updated independently.  
   
 ## Object ID  
 Object IDs are permanent addresses of objects. OIDs persist for the lifetime of the server and after server reboots, resets etc.  
@@ -32,9 +35,15 @@ Object types define what RPCs an object must implement.
 Object types are a uint16.
 
 All object types have their own RPC addresses by rpcids. rpcids are an uint16. rpcid 0 (decimal) is reserved for no-op.
+RPCIDs are unique to their RPC functions.
 The highest bit of the rpcid is the response bit. If it is set, then the message is a response.  
 The second highest bit of the rpcid is the error bit. If it is set, then the message is an error.
+Due to the nature of errors, an error message *must* be a response message aswell.
 all RPCs other than special discovery RPCs (implemented by the root object) are not allowed to have variable lenght fields.
+
+### RPC Errors
+All errors follow this definition: `err[uint32]` err is the error code. err is little endian.  
+Error codes are documented below.
 
 Object types are to be defined by OORRP versions. Type 0 (decimal) is reserved for root object.
 
@@ -47,23 +56,40 @@ Root object implements these RPCs (Tailing r means it is the response definition
 TODO: Errors for each RPC
 1: typeof. `oid[uint64]`. The typeof RPC is used to get the object type of the object at oid.
 1r: typeof. `otype[uint16]`. otype represents the object's type. Little endian.  
+1re: 
+    RPC Error point + 1: Object does not exist.
 
 2: oidof. `name_len[uint32], name[name_len]` name_len represents the lenght of the name in bytes.. name represents the lenght of the name. returns the OID of the queried object. name_len is little endian.
 2r: oidof `oid[uint64]` oid represents the object ID of the queried object. oid is little endian.  
+2re: 
+    RPC error point + 1: Name too long.  
+    RPC error point + 2: No object with name exists.
+
 
 3: nameof `oid[uint64]`. Returns the name of the object at oid. oid is little endian.  
 3r: nameof. `name_len[uint32], name[name_len]`. name_len represent the lenght of the name in bytes. name is the name of the queried object. name_len is little endian.  
+3re:
+    RPC error point + 1: Object does not exist.
 
 4: sizeof. `Adds no additional headers.` Returns the maximum message size the OORRP server can handle.  
 4r: sizeof. `size[uint64]`. size represents the maximum message size the server can handle. size is little endian.  
+4re: 
+    (This RPC cannot fail.)
 
 5: get_object_amount. `Adds no additional headers.`. returns the amount of objects the server has.
 5r: get_object_amount. `obj_amount[uint64]`. obj_amount represents the amount of objects the server has. obj_amount is little endian.
+5re:
+    (This RPC cannot fail.)
 
-6: get_oid `i[uint64]`. Gets the OID of the i'th object. (Objects are sorted by their OIDs. When i = 0, the object at that position is the object with the highest numerical OID.) i is little endian.  
+6: get_oid `i[uint64]`. Gets the OID of the i'th object. (This object table must be stable as it is used for discovery.) i is little endian.  
 6r: get_oid. `oid[uint64]` oid represents the object id of the object. oid is little endian.
+6re:
+    RPC error point + 1: No object at position i.
 
-TODO: get_inflight_size
+7: get_inflight_size. `Adds no additional headers.` Returns the maximum amount of in-flight messages the server can handle for the querying client.  
+7r: get_inflight_size `size[uint8]` size represents the maximum in-flight messages the server can handle for this client. 
+7re:
+    (This RPC cannot fail.)
 
 ## Object lifetimes
 An object at an OID may not dynamically change its type. The only change that can happen is for the object to be deleted. Any other change during its life is not allowed.
@@ -79,6 +105,10 @@ Base header definition:
 
 rsiz represents the full message size. This size includes rsiz's space aswell.
 rid is the message ID of the message. It is only used to corrolate request-reponse pairs. Due to this, it only applies to messages that are in-flight. message ID collisions are allowed as long as the colliding messages are not in-flight at the same time.
+oid is the object ID to be operated on.  
+rpcid is the RPCID of the object.
+otype is the object type of the object.
+crc is the CRC of the message. It is to be filled with zero when the CRC is being computed. It follows the CRC-32 standard.
 
 ## rid and async
 RID applies *per client*. If a server is handling multiple clients, RID collisions among clients are allowed.  
@@ -100,7 +130,8 @@ Error codes ranging from 1000 to 2000 are message errors.
 1004: Object does not exist.
 1005: Request size exceeds buffer limits.
 
-Error codes after `2^32 - 1 / 2` (2_147_483_647 decimal) are open for use by RPCs defined by current and later versions of OORRP. But before that point it is reserved for OORRP.
+Error codes after `2^32 - 1 / 2` (2_147_483_647 decimal) (This value may be referred as "RPC Error Point" in this document.) are open for use by RPCs defined by current and later versions of OORRP. But before that point it is reserved for OORRP.
+After the RPC error point, error codes are tied to their RPCs. Due to this diffirent RPCs can have colliding error codes.
 
 # After this point is V1 specific.
 
