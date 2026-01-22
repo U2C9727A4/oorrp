@@ -1,7 +1,7 @@
 # Warning  
 This document is currently marked as incomplete.  
   
-# Object Oriented Remote Resource Protocol V1  
+# Object Oriented Remote Resource Protocol  
 OORRP is a asynchronus RPC protocol mainly intended for embedded devices. It aims to have a minimal memory and CPU footprint.  
 It is intended to be point-to-point with master-slave and master-master topology. (master-master explained in a later section.)  
 
@@ -105,7 +105,7 @@ Objects may dynamically appear and disappear, but must obey the OID rule of havi
 (All integers in base headers are little endian.)  
 Base headers are a special type of headers that do not change accross OORRP versions. (Left side comes first.)  
 Base header definition:  
-    rsiz[uint32], rid[uint8], oid[uint64], rpcid[uint16], otype[uint16], crc[uint32], ... (Additional headers based on object type and RPCID)
+    rsiz[uint32], rid[uint8], oid[uint64], rpcid[uint16], otype[uint16], crc[uint32], maver[uint8], miver[uint8] ... (Additional headers based on object type and RPCID)
 
 rsiz represents the full message size. This size includes rsiz's space aswell.
 rid is the message ID of the message. It is only used to corrolate request-reponse pairs. Due to this, it only applies to messages that are in-flight. message ID collisions are allowed as long as the colliding messages are not in-flight at the same time.
@@ -113,6 +113,8 @@ oid is the object ID to be operated on.
 rpcid is the RPCID of the object.
 otype is the object type of the object.
 crc is the CRC of the message. It is to be filled with zero when the CRC is being computed. It follows the CRC-32 standard.
+maver is the major version.  
+miver is the minor version.
 
 ## rid and async
 RID applies *per client*. If a server is handling multiple clients, RID collisions among clients are allowed.  
@@ -151,7 +153,8 @@ Ordered
 byte-stream transport.
 
 However, these expections do not have to be fully met by the transport. These requirement can also be met by a HAL layer. Message-based transports can still be used if the HAL can do fragmentation and eventually convert it into a byte-stream.
-# After this point is V1 specific.
+# After this point is version specific.
+# OORRP version V1.0
 
 +TODO:
 +Topology types
