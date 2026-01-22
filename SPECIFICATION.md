@@ -89,13 +89,17 @@ TODO: Errors for each RPC
 7: get_inflight_size. `Adds no additional headers.` Returns the maximum amount of in-flight messages the server can handle for the querying client.  
 7r: get_inflight_size `size[uint8]` size represents the maximum in-flight messages the server can handle for this client. 
 7re:
-    (This RPC cannot fail.)
+    (This RPC cannot fail.)  
+
+8: promote `Adds no additional headers`. Promotes the server from a slave into master.  
+8r: promote. `Adds no additional headers.` Server successfully promoted to master.  
+8re:
+    RPC error point + 1: Underlying transport failure.
+    RPC Error point + 2: Promotion refused.
 
 ## Object lifetimes
 An object at an OID may not dynamically change its type. The only change that can happen is for the object to be deleted. Any other change during its life is not allowed.
 Objects may dynamically appear and disappear, but must obey the OID rule of having a set one accross its lifetimes.
-
-
 
 # Base headers
 (All integers in base headers are little endian.)  
@@ -133,15 +137,40 @@ Error codes ranging from 1000 to 2000 are message errors.
 Error codes after `2^32 - 1 / 2` (2_147_483_647 decimal) (This value may be referred as "RPC Error Point" in this document.) are open for use by RPCs defined by current and later versions of OORRP. But before that point it is reserved for OORRP.
 After the RPC error point, error codes are tied to their RPCs. Due to this diffirent RPCs can have colliding error codes.
 
+# Master-Slave and Master-Master  
+Master-Slave is the default operating mode. The client is the master, the server is the slave. Only the client can initiate requests.  
+Master-Master is the secondary operating mode. Both sides are masters. In this mode, both sides can make requests to eachother. This is made possible by the fact that the only diffirence between a request and response message is just a response bit in the RPCID. However, not all transports can support this, due to this the slave is free to refuse being promoted to a master.
+
+# Retries
+When a message errors out with a invalid CRC error, It must be retried for a minimum of 5 times before the client gives up. The failed message must be sent identically.
+
+# Transport
+OORRP is Transport-agnostic. It only expects a:
+Point to point
+Ordered
+byte-stream transport.
+
+However, these expections do not have to be fully met by the transport. These requirement can also be met by a HAL layer. Message-based transports can still be used if the HAL can do fragmentation and eventually convert it into a byte-stream.
 # After this point is V1 specific.
 
-TODO:
-Topology types
++TODO:
++Topology types
+# Object types
+## Digital Pin object. (Object type 1)  
+The digital pin object is exactly as it sounds; It represents a digital pin.TO
+### RPCs
+(All integers are little endian., the heading numbers are RPCIDs in decimal, tailing r means response, tailing e means error.)
+1: set_state. `state[uint8]`. Sets the state of the pin. state of 1 (decmial) means the pin should be at a logical 1. state of 0 means the pin should be at a logical 0.  
+1r: set_state. `Adds no additional headers.` Only tells the operation has completed.  
+1re: This RPC cannot fail.
+
+TODODP: get_state, set_mode (out, in, modifier pull-down and pullup), get_mode
 
 TODOV1:
-Digital pin object
+-Digital pin object
 PWM pin object
 ADC object
 DAC object
 AxisLinearActuator object
 RotatingActuator object
+Heater object
