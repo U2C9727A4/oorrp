@@ -3,7 +3,7 @@ This document is currently marked as incomplete.
   
 # Object Oriented Remote Resource Protocol  
 OORRP is a asynchronus RPC protocol mainly intended for embedded devices. It aims to have a minimal memory and CPU footprint.  
-It is intended to be point-to-point with master-slave and master-master topology. (master-master explained in a later section.)  
+It is intended to be a control plane with point-to-point, master-slave and master-master topology. (master-master explained in a later section.)  
 
 # OORRP Request  
 An OORRP request is a request with base headers and object-specific headers.  
