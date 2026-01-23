@@ -50,7 +50,8 @@ Object types are to be defined by OORRP versions. Type 0 (decimal) is reserved f
 ## Object Hierarchy  
 OORRP has a flat object hierachy. This is a design decision to prevent variable-lenght RPC arguements and responses. 
 ### Root object
-The root object is a special object that implements protocol RPCs, and is typeless.
+The root object is a special optional object that implements protocol RPCs, and is typeless.
+For servers that do not implement a root object, the root OID must not have an object at it and return no object error.
 The root object has the name "root" and OID of 0 (decimal) and a type of 0 (decimal).
 Root object implements these RPCs (Tailing r means it is the response definition, the heading numbers are their RPCIDs in decimal.):  
 TODO: Errors for each RPC
