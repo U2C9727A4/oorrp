@@ -190,6 +190,7 @@ The digital pin object is exactly as it sounds; It represents a digital pin.
 ## PWM Pin object (Object type 2)
 THE PWM pin object is a type of pin that *outputs* a PWM signal.
 TODOPWM: Research PWM on duty cycle, period sizes, hertz etc.
+TODOPWM: get_period, set_period, set_width, get_width, set_width_accuraccy_in_bits, get_width_accuraccy_in_bits
 
 ## ADC Pin object (Object type 3)
 The ADC Pin object is a type of pin that is capable of reading analog values.
