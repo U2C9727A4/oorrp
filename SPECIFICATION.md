@@ -8,6 +8,7 @@ It is intended to be a control plane with point-to-point, master-slave and maste
 # OORRP Request  
 An OORRP request is a request with base headers and object-specific headers.  
 It is fully self-contained and must be held fully in memory before parsing.  
+OORRP requests, due to their self-contained nature are atomic. A RPC request may not have partial states or failures.
 ## In-flight requests  
 In-flight requests are requests that a server has not outputted a response to.
 
@@ -146,6 +147,7 @@ Master-Master is the secondary operating mode. Both sides are masters. In this m
 
 # Retries
 When a message errors out with a invalid CRC error, It must be retried for a minimum of 5 times before the client gives up. The failed message must be sent identically.
+If the server response has a invalid CRC, the client must send a response to the response of the server with an invalid CRC error so that the server can retry. (rid must be the same). 5 times of minimum retries.
 
 # Transport
 OORRP is Transport-agnostic. It only expects a:
@@ -161,17 +163,52 @@ However, these expections do not have to be fully met by the transport. These re
 +Topology types
 # Object types
 ## Digital Pin object. (Object type 1)  
-The digital pin object is exactly as it sounds; It represents a digital pin.TO
+The digital pin object is exactly as it sounds; It represents a digital pin.
 ### RPCs
 (All integers are little endian., the heading numbers are RPCIDs in decimal, tailing r means response, tailing e means error.)
 1: set_state. `state[uint8]`. Sets the state of the pin. state of 1 (decmial) means the pin should be at a logical 1. state of 0 means the pin should be at a logical 0.  
 1r: set_state. `Adds no additional headers.` Only tells the operation has completed.  
 1re: This RPC cannot fail.
 
-TODODP: get_state, set_mode (out, in, modifier pull-down and pullup), get_mode
+2: get_state. `Adds no additional headers.` Gets the logical state of the pin.
+2r: get_state. `state[uint8]`. state represents the current logical state of the pin. 0 is low, 1 is high.   
+2re: This RPC cannot fail.
+
+3: set_mode `mode[uint8]` Sets the mode of the pin. Mode is a enum with this layout: (numbers are decimal)  
+    0: input, pulldown
+    1: output, pulldown
+    2: input, pullup  
+    3: output, pullup
+
+3r: `Adds no additional headers`. Merely exists to communicate success.
+3re: This RPC cannot fail.  
+
+4: get_mode `Adds no additional headers`. Gets the current mode of the pin.
+4r: get_mode `mode[uint8]` mode is the current mode of the pin. Follows the format defined in RPCID 3.  
+4re: This RPC cannot fail.
+
+## PWM Pin object (Object type 2)
+THE PWM pin object is a type of pin that *outputs* a PWM signal.
+TODOPWM: Research PWM on duty cycle, period sizes, hertz etc.
+
+## ADC Pin object (Object type 3)
+The ADC Pin object is a type of pin that is capable of reading analog values.
+TODOADC: Reference voltage, mV unit etc.
+
+## DAC Pin object (Object type 4)
+The DAC pin object is a type of pin that is capable of outputting analog values in voltage.
+
+## AxisLinearActuator (Object type 5)
+The Axis linear actuator is a type of actuator that moves a point along a 1D axis based on torque, speed and position.
+
+## RotatingActuator (Object type 6)
+The rotating actuator is a type of actuator that rotates on a point.
+
+## The heater object (object type 7)
+The heater object is exactly as it sounds; A heater.
 
 TODOV1:
--Digital pin object
++Digital pin object
 PWM pin object
 ADC object
 DAC object
