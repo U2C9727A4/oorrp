@@ -114,9 +114,12 @@ rid is the message ID of the message. It is only used to corrolate request-repon
 oid is the object ID to be operated on.  
 rpcid is the RPCID of the object.
 otype is the object type of the object.
-crc is the CRC of the message. It is to be filled with zero when the CRC is being computed. It follows the CRC-32 standard.
+crc is the CRC of the message. It is to be filled with zero when the CRC is being computed. It follows the CRC-32/IEEE standard.
 maver is the major version.  
 miver is the minor version.
+
+During an error, rsiz, rid, oid, rpcid, otype, maver and miver are echoed back.  
+the CRC is recomputed.
 
 ## rid and async
 RID applies *per client*. If a server is handling multiple clients, RID collisions among clients are allowed.  
@@ -188,9 +191,25 @@ The digital pin object is exactly as it sounds; It represents a digital pin.
 4re: This RPC cannot fail.
 
 ## PWM Pin object (Object type 2)
-THE PWM pin object is a type of pin that *outputs* a PWM signal.
-TODOPWM: Research PWM on duty cycle, period sizes, hertz etc.
-TODOPWM: get_period, set_period, set_width, get_width, set_width_accuraccy_in_bits, get_width_accuraccy_in_bits
+The PWM pin object is a type of pin that *outputs* a PWM signal.
+### RPCs
+(All integers are little endian the heading numbers are the RPCIDs of the RPCs and the heading "r" means it is the response and "e" means it is an error.)
+1: get_max_duty. `Adds no additional headers`. Gets the duty cycle size that represents 100% active signal.  
+1r: get_max_duty. `maxduty[uint32]` maxduty represents the maximum duty cycle the pin supports.   
+1re: This RPC cannot fail.  
+
+2: set_duty. `duty[uint32]`, Sets the duty cycle of the pin.  
+2r: set_duty. `Adds no additional headers.`. Merely communicates success.
+2re: This RPC can fail with the following error codes:  
+    RPC error point + 1: Duty larger than maximum supported value.  
+
+3: get_max_freq. `Adds no additional headers.` Gets the maximum frequency (in hz) the pin can support.
+    
+
+
+
++TODOPWM: Research PWM on duty cycle, period sizes, hertz etc.
+TODOPWM: get_max_positive_cycle_size, set_positive_cycle_size, get_frequency, set_frequency, get_max_freq, get_cur_duty, get_voltage_level
 
 ## ADC Pin object (Object type 3)
 The ADC Pin object is a type of pin that is capable of reading analog values.
