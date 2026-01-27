@@ -194,6 +194,7 @@ The digital pin object is exactly as it sounds; It represents a digital pin.
 The PWM pin object is a type of pin that *outputs* a PWM signal.
 ### RPCs
 (All integers are little endian the heading numbers are the RPCIDs of the RPCs and the heading "r" means it is the response and "e" means it is an error.)
+(Duty is the amount indicating how much of the time is set to HIGH. If max duty is 255, then the duty would have to be set to 127 to be 50% on.)
 1: get_max_duty. `Adds no additional headers`. Gets the duty cycle size that represents 100% active signal.  
 1r: get_max_duty. `maxduty[uint32]` maxduty represents the maximum duty cycle the pin supports.   
 1re: This RPC cannot fail.  
@@ -204,16 +205,36 @@ The PWM pin object is a type of pin that *outputs* a PWM signal.
     RPC error point + 1: Duty larger than maximum supported value.  
 
 3: get_max_freq. `Adds no additional headers.` Gets the maximum frequency (in hz) the pin can support.
-    
+3r: get_max_freq `maxfreq[uint32]`. maxfreq is the maximum frequency the pin can support.  
+2re: This RPC cannot fail.
 
+4: set_freq. `freq[uint32]` Set the frequency of the pin to freq hertz.
+4r: set_freq. `Adds no additional headers` Merely communicats success.
+4re: This RPC can fail the following error codes:
+    RPC error point + 1: Operation not supported.
+    RPC error point + 2: freq larger than maximum frequency.
+    RPC error point + 3: freq smalller than 1.
 
-
-+TODOPWM: Research PWM on duty cycle, period sizes, hertz etc.
-TODOPWM: get_max_positive_cycle_size, set_positive_cycle_size, get_frequency, set_frequency, get_max_freq, get_cur_duty, get_voltage_level
+5: get_duty. `Adds no additional headers`. Gets the current duty of the pin.
+5r: get_duty. `duty[uint32]` duty repredsents the current duty the pin is outputting.
+5re: This RPC cannot fail.
 
 ## ADC Pin object (Object type 3)
 The ADC Pin object is a type of pin that is capable of reading analog values.
 TODOADC: Reference voltage, mV unit etc.
+### RPCs
+(All integers are little endian the heading numbers are the RPCIDs of the RPCs and the heading "r" means it is the response and "e" means it is an error.)
+1: get_ref_voltage. `Adds no additional headers`. gets the reference voltage.
+1r: get_ref_voltage. `ref[uint32]`. ref is the reference voltage in milivolts.  
+1re: This RPC cannot fail.
+
+2: set_ref_volt. `mv[uint32]` mv is the new reference voltage in millivolts.  
+2r: set_ref_volt. `Adds no additional headers`. Merely communicates success.
+2re: This RPC can fail with the following values:
+    RPC error point + 1: New reference voltage is outside the supported range.
+    RPC Error point + 2: Operation not supported.
+
+TODOADC: get_ref_volt, get_max_val, get_reading, set_ref_volt, 
 
 ## DAC Pin object (Object type 4)
 The DAC pin object is a type of pin that is capable of outputting analog values in voltage.
