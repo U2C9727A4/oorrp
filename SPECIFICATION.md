@@ -234,7 +234,13 @@ TODOADC: Reference voltage, mV unit etc.
     RPC error point + 1: New reference voltage is outside the supported range.
     RPC Error point + 2: Operation not supported.
 
-TODOADC: get_ref_volt, get_max_val, get_reading, set_ref_volt, 
+3: get_max_val. `Adds no additional headers.` Gets the maximum value the ADC can read. (Maximum value = reference voltage, 0 = 0V.)
+3r: get_max_val. `maxval[uint32]` maxvel represents the maximum value the ADC can read.  
+3re: This RPC cannot fail.
+
+4: get_reading. `Adds no additional headers.`. Gets a reading from the pin.  
+4r: get_reading. `reading[uint32]`. reading represents the reading.  
+4re: This RPC cannot fail.
 
 ## DAC Pin object (Object type 4)
 The DAC pin object is a type of pin that is capable of outputting analog values in voltage.
