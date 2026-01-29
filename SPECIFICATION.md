@@ -247,6 +247,30 @@ The DAC pin object is a type of pin that is capable of outputting analog values 
 
 ## AxisLinearActuator (Object type 5)
 The Axis linear actuator is a type of actuator that moves a point along a 1D axis based on torque, speed and position.
+### RPCIDs
+(All integers are little endian the heading numbers are the RPCIDs of the RPCs and the heading "r" means it is the response and "e" means it is an error.)  
+
+1: get_unit. `Adds no additional headers.` Gets the unit type this actuator uses.
+1r: get_unit `unittype[uint8]` unittype represents the unit type the actuator uses.  
+### Unit Types  
+The returned unittype may have these values, with the corresponding units:
+1: Micrometers  
+2: Millimeters
+1re: This RPC cannot fail.  
+
+2: get_axis_len. `Adds no additional headers.` Gets the lenght of the axis in unittype units.
+2r: get_axis_len. `len[uint32]` len represents the lenght of the axis in unittype units.  
+2re: This RPC cannot fail.
+
+3: get_pos. `Adds no additional headers.` gets the current position of the point (absolute) in unittype units.
+3r: get_pos. `pos[uint32]`. pos represents the current position of the point (absolute) in unittype units.
+3re: This RPC cannot fail.
+
+4: get_tolerance. `Adds no additional headers`. Gets the tolerences of the actuator.
+4r: get_tolerence. `tolerence[uint32]` Gets the tolerence in unittype units. Example: If the unit type of the object is mm, a tolerence of 5 would mean the actuator has the tolerence of: `± 5mm`.
+4re: This RPC cannot fail.
+
+TODOALA: get_pos, set_pos, get_max_force, get_max_velocity, get_axis_len, get_unit, set_pos_delta, get_accuraccy
 
 ## RotatingActuator (Object type 6)
 The rotating actuator is a type of actuator that rotates on a point.
