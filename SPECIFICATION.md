@@ -270,7 +270,28 @@ The returned unittype may have these values, with the corresponding units:
 4r: get_tolerence. `tolerence[uint32]` Gets the tolerence in unittype units. Example: If the unit type of the object is mm, a tolerence of 5 would mean the actuator has the tolerence of: `± 5mm`.
 4re: This RPC cannot fail.
 
-TODOALA: get_pos, set_pos, get_max_force, get_max_velocity, get_axis_len, get_unit, set_pos_delta, get_accuraccy
+5: get_max_force. `Adds no additional headers.` Gets the maximum force the actuator can exert, in newtons.  
+5r: get_max_force. `maxforce[uint32]` maxforce represents the maximum force the actuator can exert in newtons.  
+5re: This RPC cannot fail.
+
+6: get_max_vel. `Adds no additional headers.` Gets the maximum velocity the actuator can move in. In unittype/s.
+6r: get_max_vel. `maxvel[uint32]`. maxvel is the maximum velocity the actuator can move in. If the unit type is mm, a maxvel of 5 would mean the actuator moves a maximum speed of 5mm/s (5 mms per second)  
+6re: This RPC cannot fail.
+
+7: set_abs_pos. `newpos[uint32], velocity[uint32], force[uint32]`. Actuates the actuator the the given new position and force force and velocity velocity (velocity is in unit per second and force is in newtons.)  
+7r: `realpos[uint32]`. realpos is the real position (absolute) of the actuator after the operation.  
+7re: This RPC can fail with the following error values:
+    RPC Error point + 1: newpos outside supported range.  
+    RPC Error point + 2: velocity outside supported range.  
+    RPC Error point + 3: force outside supported range.
+
+8: set_relative_pos. `delta[int32], velocity[uint32], force[uint32]`. Actuates the actuator to the given delta position at `force` force and `velocity` velocity. (Velocity is in units per second and force is in newtons.)
+8r: `realpos[uint32]`. realpos is the real position (absolute) of the actuator after the operation. 
+8re: This RPC can fail with the following error values:
+    RPC Error point + 1: delta outside supported range.  
+    RPC Error point + 2: velocity outside supported range.  
+    RPC Error point + 3: force outside supported range.
+
 
 ## RotatingActuator (Object type 6)
 The rotating actuator is a type of actuator that rotates on a point.
