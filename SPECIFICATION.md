@@ -12,6 +12,15 @@ OORRP requests, due to their self-contained nature are atomic. A RPC request may
 ## In-flight requests  
 In-flight requests are requests that a server has not outputted a response to.
 
+## Responses
+An OORRP Response has the followring propeteries:
+rid, oid, otype, maver and miver are echoed back.  
+the CRC and rsiz is recomputed
+RPCID is recomputed to have the response bit set. Error bit must be set aswell if the response is an error response.  
+## Retries
+When any OORRP message gets an error code with CRC mismatch error, It must be retried. The message being an error, response or request does not matter. If any side sends a CRC mismatch error with the associated rid, the opposite end must retry.  
+To prevent deadlocks, a maximum of 5 retry attempts for per rid is allowed. 
+
 # OORRP Objects
 An OORRP Object (can also be called a resource) is a command endpoint that exposes RPCs based on its type.  
 All objects have two addresses;  
@@ -118,8 +127,7 @@ crc is the CRC of the message. It is to be filled with zero when the CRC is bein
 maver is the major version.  
 miver is the minor version.
 
-During an error, rsiz, rid, oid, rpcid, otype, maver and miver are echoed back.  
-the CRC is recomputed.
+
 
 ## rid and async
 RID applies *per client*. If a server is handling multiple clients, RID collisions among clients are allowed.  
@@ -147,10 +155,6 @@ After the RPC error point, error codes are tied to their RPCs. Due to this diffi
 # Master-Slave and Master-Master  
 Master-Slave is the default operating mode. The client is the master, the server is the slave. Only the client can initiate requests.  
 Master-Master is the secondary operating mode. Both sides are masters. In this mode, both sides can make requests to eachother. This is made possible by the fact that the only diffirence between a request and response message is just a response bit in the RPCID. However, not all transports can support this, due to this the slave is free to refuse being promoted to a master.
-
-# Retries
-When a message errors out with a invalid CRC error, It must be retried for a minimum of 5 times before the client gives up. The failed message must be sent identically.
-If the server response has a invalid CRC, the client must send a response to the response of the server with an invalid CRC error so that the server can retry. (rid must be the same). 5 times of minimum retries.
 
 # Transport
 OORRP is Transport-agnostic. It only expects a:
