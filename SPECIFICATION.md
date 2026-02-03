@@ -298,7 +298,11 @@ The returned unittype may have these values, with the corresponding units:
 
 
 ## RotatingActuator (Object type 6)
-The rotating actuator is a type of actuator that rotates on a point.
+The rotating actuator is a type of actuator that rotates on a point.  
+### RPCIDs  
+(All integers are little endian the heading numbers are the RPCIDs of the RPCs and the heading "r" means it is the response and "e" means it is an error.)  
+
+TODORA: rotate_continious, rotate_delta, rotate_absolute, get_pos. use minutes as the unit
 
 ## The heater object (object type 7)
 The heater object is exactly as it sounds; A heater.
