@@ -297,10 +297,23 @@ The returned unittype may have these values, with the corresponding units:
     RPC Error point + 3: force outside supported range.
 
 
-## RotatingActuator (Object type 6)
-The rotating actuator is a type of actuator that rotates on a point.  
+## ContiniousRotationActuator (Object type 6)
+The continious rotation actuator is a type of actuator that continiously rotates on a point without a way to tell its position. 
 ### RPCIDs  
 (All integers are little endian the heading numbers are the RPCIDs of the RPCs and the heading "r" means it is the response and "e" means it is an error.)  
+1: rotate. `direction[uint8], speed[uint32]`. Direction represents the direction the actuator should rotate in. (direction 0 = clockwise, direction 1 = anti clockwise.). speed represents the speed the actuator should rotate, in deci-rpm (1 deci RPM = 1/10 RPM.).
+1r: rotate. `Adds no additional headers.`. Merely communicates success.
+1re: This RPC can fail with the following error values:  
+    RPC Error point + 1: Speed outside supported range
+    RPC Error point + 2: Safety exception
+    RPC Error point + 3: Unknown direction value.
+
+2: get_max_speed. `Adds no additional headers`. Returns the maximum speed the actuator can rotate in, in deci-rpm (1 deci RPM = 1/10 RPM.).  
+2r: get_max_speed. `maxspeed[uint32]`. maxspeed represents the maximum speed the actuator can rotate in, in deci-rpm (1 deci RPM = 1/10 RPM.).  
+2re: This RPC cannot fail.
+
+TODOCRA: get_max_speed, 
+
 
 TODORA: rotate_continious, rotate_delta, rotate_absolute, get_pos. use minutes as the unit
 
