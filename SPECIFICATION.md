@@ -2,7 +2,7 @@
 This document is currently marked as incomplete.  
   
 # Object Oriented Remote Resource Protocol  
-OORRP is a asynchronus RPC protocol mainly intended for embedded devices. It aims to have a minimal memory and CPU footprint.  
+OORRP is a asynchronus RPC protocol mainly intended for embedded devices. It aims to have a minimal memory and CPU footprint. with soft-rt latency characteristics (<=10ms RTT)  
 It is intended to be a control plane with point-to-point, master-slave and master-master topology. (master-master explained in a later section.)  
 
 # OORRP Request  
@@ -30,6 +30,9 @@ oid (Object ID).
 Name is a human-readable name of the object, in ASCII. It cannot be used for object RPCs.  
 oid is defined below.  
 Both name and OID is unique to their respective objects.
+
+## Concurrency
+Concurrently accessing a OORRP object is not allowed. Due to this, implementions of OORRP must define a concurrency model for themselves.
 
 ## Object versioning
 OORRP is defined atomically. Objects, RPCs and error values may not be updated independently.  
@@ -146,8 +149,11 @@ Error codes ranging from 1000 to 2000 are message errors.
 1001: Invalid OID
 1002: Invalid RPCID
 1003 Invalid Object Type.
-1004: Object does not exist.
 1005: Request size exceeds buffer limits.
+
+Error codes ranging from 2000 to 3000 are authorization errors.  
+2000: Access to server denied.  
+2001: Access to object denied.  
 
 Error codes after `2^32 - 1 / 2` (2_147_483_647 decimal) (This value may be referred as "RPC Error Point" in this document.) are open for use by RPCs defined by current and later versions of OORRP. But before that point it is reserved for OORRP.
 After the RPC error point, error codes are tied to their RPCs. Due to this diffirent RPCs can have colliding error codes.
@@ -249,7 +255,7 @@ TODOADC: Reference voltage, mV unit etc.
 ## DAC Pin object (Object type 4)
 The DAC pin object is a type of pin that is capable of outputting analog values in voltage.
 
-## AxisLinearActuator (Object type 5)
+## Axis Linear Actuator (Object type 5)
 The Axis linear actuator is a type of actuator that moves a point along a 1D axis based on torque, speed and position.
 ### RPCIDs
 (All integers are little endian the heading numbers are the RPCIDs of the RPCs and the heading "r" means it is the response and "e" means it is an error.)  
@@ -297,7 +303,7 @@ The returned unittype may have these values, with the corresponding units:
     RPC Error point + 3: force outside supported range.
 
 
-## ContiniousRotationActuator (Object type 6)
+## Continious Rotation Actuator (Object type 6)
 The continious rotation actuator is a type of actuator that continiously rotates on a point without a way to tell its position. 
 ### RPCIDs  
 (All integers are little endian the heading numbers are the RPCIDs of the RPCs and the heading "r" means it is the response and "e" means it is an error.)  
@@ -312,12 +318,16 @@ The continious rotation actuator is a type of actuator that continiously rotates
 2r: get_max_speed. `maxspeed[uint32]`. maxspeed represents the maximum speed the actuator can rotate in, in deci-rpm (1 deci RPM = 1/10 RPM.).  
 2re: This RPC cannot fail.
 
-TODOCRA: get_max_speed, 
+3: stop. `Adds no additional headers.` Stops rotation of the actuator.  
+3r: stop. `Adds no additional headers.` Merely communicates success.
+3re: This RPC cannot fail.
 
+## Rotating Actuator (Object type 7)
+The rotating actuator is a type of rotating actuator that is capable of telling its current position and moving accordingly based on said position.
 
-TODORA: rotate_continious, rotate_delta, rotate_absolute, get_pos. use minutes as the unit
+TODORA: rotate_delta, rotate_absolute, get_pos. use minutes as the unit, get_pos_range
 
-## The heater object (object type 7)
+## The heater object (object type 8)
 The heater object is exactly as it sounds; A heater.
 
 TODOV1:
